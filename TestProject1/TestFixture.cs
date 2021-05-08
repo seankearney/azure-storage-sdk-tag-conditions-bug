@@ -29,7 +29,7 @@ namespace TestProject1
 
             Configuration = config.Build();
 
-            BlobStorageConnectionString = Configuration["BlobStorateConnectionString"];
+            BlobStorageConnectionString = Configuration["BlobStorageConnectionString"];
 
             await CreateTestRunContainer();
             await CreateSampleBlobs();
