@@ -3,6 +3,8 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -152,6 +154,31 @@ namespace TestProject1
             // We should still have original content here
             text = await TestFixture.DownloadAndReadBlobContents(blobClient).ConfigureAwait(false);
             Assert.Equal("sample", text);
+        }
+
+        [Theory]
+        [InlineData(4)]
+        [InlineData(5)]
+        public async Task Blobs_larger_than_4mb_uploaded_with_BlobRequestConditions_fails_with_conditions_not_met(int numberOfMegs)
+        {
+            string fileName = Guid.NewGuid().ToString("N").ToString();
+
+            // Getnerate an _x_ MB stream
+            await using var data = new MemoryStream(Encoding.UTF8.GetBytes(new string('a', 1_024 * 1_024 * numberOfMegs)));
+
+            BlobClient blobClient = Fixture.GetBlobClient(fileName);
+            var localId = 213700871031095297;
+            
+            var options = new BlobUploadOptions
+            {
+                Tags = new Dictionary<string, string> { { "LocalId", localId.ToString() } },
+                Conditions = new BlobRequestConditions
+                {
+                    TagConditions = $@"""LocalId"" < '{localId}'"
+                }
+            };
+          
+            await blobClient.UploadAsync(data, options).ConfigureAwait(false);
         }
     }
 }
