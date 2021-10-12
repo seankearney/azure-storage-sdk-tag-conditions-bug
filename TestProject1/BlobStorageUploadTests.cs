@@ -21,7 +21,7 @@ namespace TestProject1
         }
 
         /*
-         Note: 
+         Note:
             A `RetryableStreamImpl` is the underlying Stream provided when we use BlobClient.DownloadAsync()...Value.Content;
             See https://github.com/Azure/azure-sdk-for-net/blob/master/sdk/core/Azure.Core/src/Shared/RetriableStream.cs
          */
@@ -161,14 +161,15 @@ namespace TestProject1
         [InlineData(5)]
         public async Task Blobs_larger_than_4mb_uploaded_with_BlobRequestConditions_fails_with_conditions_not_met(int numberOfMegs)
         {
-            string fileName = Guid.NewGuid().ToString("N").ToString();
+          Fixture.KeepUserContainerAfterTestIsDone = true;
+          string fileName = Guid.NewGuid().ToString("N");
 
             // Getnerate an _x_ MB stream
             await using var data = new MemoryStream(Encoding.UTF8.GetBytes(new string('a', 1_024 * 1_024 * numberOfMegs)));
 
             BlobClient blobClient = Fixture.GetBlobClient(fileName);
             var localId = 213700871031095297;
-            
+
             var options = new BlobUploadOptions
             {
                 Tags = new Dictionary<string, string> { { "LocalId", localId.ToString() } },
@@ -177,7 +178,7 @@ namespace TestProject1
                     TagConditions = $@"""LocalId"" < '{localId}'"
                 }
             };
-          
+
             await blobClient.UploadAsync(data, options).ConfigureAwait(false);
         }
     }
