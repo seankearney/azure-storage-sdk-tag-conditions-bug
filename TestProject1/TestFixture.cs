@@ -12,7 +12,7 @@ namespace TestProject1
     {
         public enum Samples { sample, sample2 }
 
-        public readonly string CONTAINER_NAME = Guid.NewGuid().ToString();
+        public readonly string CONTAINER_NAME = "repro";
 
         public IConfiguration Configuration { get; private set; }
 
@@ -41,7 +41,7 @@ namespace TestProject1
             {
                 return Task.CompletedTask;
             }
-            
+
             BlobServiceClient blobServiceClient = CreateServiceClient(BlobStorageConnectionString);
             return blobServiceClient.DeleteBlobContainerAsync(CONTAINER_NAME);
         }
