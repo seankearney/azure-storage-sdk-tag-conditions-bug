@@ -1,4 +1,6 @@
-Bug Report for https://github.com/Azure/azure-sdk-for-net/issues/20931
+Bug Report for
+1. https://github.com/Azure/azure-sdk-for-net/issues/20931
+1. https://github.com/Azure/azure-sdk-for-net/issues/24650
 
 **Describe the bug**
 
