@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Azure.Storage;
 using Xunit;
 
 namespace TestProject1
@@ -78,8 +79,33 @@ namespace TestProject1
             string text = await TestFixture.DownloadAndReadBlobContents(blobClient).ConfigureAwait(false);
             Assert.Equal("sample", text);
         }
+        
+        [Fact]
+        public async Task ISSUE_2__First_upload_of_blob_from_RetryableStreamImpl_with_tags_and_conditions_should_work()
+        {
+            BlobClient blobClient = Fixture.GetBlobClient(Guid.NewGuid().ToString());
 
+            await using var sourceStream = await Fixture.GetSampleBlob();
+            
+            var options = new BlobUploadOptions
+            {
+                Tags = new Dictionary<string, string> { { "MyTag", "1" } },
+                Conditions = new BlobRequestConditions
+                {
+                    TagConditions = $@"""MyTag"" < '1'"
+                },
+                TransferOptions = new StorageTransferOptions
+                {
+                    InitialTransferSize = 1_024*1_024*100,//sourceStream.Length,
+                    MaximumTransferSize = 1_024*1_024*100,//sourceStream.Length,
+                }
+            };
+            
+            await blobClient.UploadAsync(sourceStream, options).ConfigureAwait(false);
 
+            string text = await TestFixture.DownloadAndReadBlobContents(blobClient).ConfigureAwait(false);
+            Assert.Equal("sample", text);
+        }
 
         [Fact]
         public async Task Second_upload_of_blob_from_RetryableStreamImpl_with_tags_and_valid_conditions_should_overwrite_blob()
